@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 @Data
 @NoArgsConstructor
@@ -31,13 +31,20 @@ public class UserDetailsImpl implements UserDetails {
         this.password = password;
         this.authorities = authorities;
     }
-    public static UserDetailsImpl build(User user){
-        GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole());
+    public static UserDetailsImpl build(Optional<User> user) {
+
+        User actualUser = user.orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
+
+        GrantedAuthority authority =
+                new SimpleGrantedAuthority(actualUser.getRole());
+
         return new UserDetailsImpl(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getPassword(),
+                actualUser.getId(),
+                actualUser.getUsername(),
+                actualUser.getEmail(),
+                actualUser.getPassword(),
                 Collections.singletonList(authority)
         );
     }
